@@ -1391,6 +1391,7 @@ class GRPOTrainer(BaseTrainer):
                 "add_special_tokens": False,
             }
             if is_conversational({"prompt": prompts[0]}):
+                # breakpoint()
                 generate_inputs = self.processing_class.apply_chat_template(
                     conversation=prompts,
                     **processor_kwargs,
@@ -1492,6 +1493,7 @@ class GRPOTrainer(BaseTrainer):
         # [{"role": "user", "content": "What color is the sky?"}] to
         # [{"role": "user", "content": [{"type": "image", "image": <Image>}, {"type": "text", "text": "What color is the sky?"}]}]
         if images is not None:
+            # breakpoint()
             prompts = [
                 prepare_multimodal_messages(prompt, image_list)
                 for prompt, image_list in zip(prompts, images, strict=True)
