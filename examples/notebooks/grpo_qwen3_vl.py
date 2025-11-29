@@ -52,8 +52,21 @@ def make_conversation(example):
 def format_reward(completions, **kwargs):
     """Reward function that checks if the reasoning process is enclosed within <think> and </think> tags, while the final answer is enclosed within <answer> and </answer> tags."""
     pattern = r"^<think>\n.*?\n</think>\n<answer>\n.*?\n</answer>$"
-    breakpoint()
-    matches = [re.match(pattern, content, re.DOTALL | re.MULTILINE) for content in completions]
+    
+    # Extract content strings from conversational format
+    # Each completion is a list like [{'role': 'assistant', 'content': '...'}]
+    contents = []
+    for completion in completions:
+        if isinstance(completion, list) and len(completion) > 0:
+            # Get the content from the assistant message
+            content = completion[0].get('content', '') if isinstance(completion[0], dict) else str(completion)
+            contents.append(content)
+        elif isinstance(completion, str):
+            contents.append(completion)
+        else:
+            contents.append(str(completion))
+    
+    matches = [re.match(pattern, content, re.DOTALL | re.MULTILINE) for content in contents]
     return [1.0 if match else 0.0 for match in matches]
 
 
@@ -72,7 +85,18 @@ def len_reward(completions, solution, **kwargs) -> float:
         - For correct answers: reward = 0.5 - (len - min_len)/(max_len - min_len)
         - For incorrect answers: reward = min(0, 0.5 - (len - min_len)/(max_len - min_len))
     """
-    contents = completions
+    # Extract content strings from conversational format
+    # Each completion is a list like [{'role': 'assistant', 'content': '...'}]
+    contents = []
+    for completion in completions:
+        if isinstance(completion, list) and len(completion) > 0:
+            # Get the content from the assistant message
+            content = completion[0].get('content', '') if isinstance(completion[0], dict) else str(completion)
+            contents.append(content)
+        elif isinstance(completion, str):
+            contents.append(completion)
+        else:
+            contents.append(str(completion))
 
     # First check correctness of answers
     correctness = []
